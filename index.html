@@ -1,0 +1,190 @@
+<html>
+<head>
+	<style>
+	*{padding: 0; margin:0;}
+	canvas{ background: #000000; display: block; margin: 0 auto;}
+	</style>
+</head>
+<body>
+<canvas id= "myCanvas" width="600" height="800"></canvas>
+<script type="text/javascript">
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+var wPressed = false;
+var aPressed = false;
+var sPressed = false;
+var dPressed = false;
+
+function keyDownHandler(e){
+	if(e.keyCode == 87)
+	{
+		wPressed = true;
+	}
+	if(e.keyCode == 65)
+	{
+		aPressed = true;
+	}
+	if(e.keyCode == 83)
+	{
+		sPressed = true;
+	}
+	if(e.keyCode == 68)
+	{
+		dPressed = true;
+	}
+}
+function keyUpHandler(e){
+	if(e.keyCode == 87)
+	{
+		wPressed = false;
+	}
+	if(e.keyCode == 65)
+	{
+		aPressed = false;
+	}
+	if(e.keyCode == 83)
+	{
+		sPressed = false;
+	}
+	if(e.keyCode == 68)
+	{
+		dPressed = false;
+	}
+}
+
+let size = 20;
+let heading = 0;
+let direction = 0;
+let snake = [{x:10, y:10}];
+let apple = {x:10, y:5};
+let speed = 10;
+
+function drawPart(x,y){
+	let tile = canvas.height/size;
+	ctx.fillStyle = "white";
+	ctx.fillRect(x*tile+(tile/10),y*tile+(tile/10),tile-(tile/5),tile-(tile/5));
+}
+
+function drawSnake(){
+	for(let i =0; i<snake.length;i++){
+		drawPart(snake[i].x,snake[i].y);
+	}
+}
+
+function drawApple(){
+	let tile = canvas.height/size;
+	ctx.fillStyle = "red";
+	ctx.fillRect(apple.x*tile,apple.y*tile,tile,tile);
+}
+
+function reset(){
+	heading = 0;
+	direction = 0;
+	snake = [{x:10, y:10}];
+	apple = {x:10, y:5};
+}
+
+function control(){
+	if(wPressed && heading!=2){
+		wPressed = false;
+		direction = 0;
+	}
+	if(aPressed && heading!=1){
+		aPressed = false;
+		direction = 3;
+	}
+	if(sPressed && heading!=0){
+		sPressed = false;
+		direction = 2;
+	}
+	if(dPressed && heading!=3){
+		dPressed = false;
+		direction = 1;
+	}
+}
+
+function eat(){
+	if(snake[0].x != apple.x || snake[0].y != apple.y){
+		snake.pop();
+	}
+	else
+	{
+		let x = Math.floor(Math.random()*(size));
+		let y = Math.floor(Math.random()*(size));
+		apple = {x: x, y: y};
+	}
+}
+
+function outOfBounds(){
+	if(snake[0].x>size-1 || snake[0].x<0 ||
+	snake[0].y>size-1 || snake[0].y<0){
+		return true;
+	}
+	return false;
+}
+
+function selfCollide(){
+	for(let i = 1; i<snake.length;i++)
+	{
+		if(snake[0].x==snake[i].x&&snake[0].y==snake[i].y){
+			return true;
+		}
+	}
+	return false;
+}
+
+let timer = speed;
+function move(){
+	timer--;
+	if(timer==0){
+		timer = speed;
+		switch(direction){
+			case 0:
+				snake.unshift({x:snake[0].x,y:snake[0].y-1});
+				heading = 0;
+				break;
+			case 1:
+				snake.unshift({x:snake[0].x+1,y:snake[0].y});
+				heading = 1;
+				break;
+			case 2:
+				snake.unshift({x:snake[0].x,y:snake[0].y+1});
+				heading = 2;
+				break;
+			case 3:
+				snake.unshift({x:snake[0].x-1,y:snake[0].y});
+				heading = 3;
+				break;
+			default:
+				snake.unshift({x:snake[0].x,y:snake[0].y-1});
+				heading = 0;
+				break;
+		}
+		eat();
+		if(outOfBounds()){
+			reset();
+		}
+		if(selfCollide()){
+			reset();
+		}
+	}
+}
+
+function draw(){
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+	ctx.canvas.width  = window.innerHeight;
+	ctx.canvas.height = window.innerHeight;
+	
+	drawSnake();
+	drawApple();
+	control();
+	move();
+}
+setInterval(draw, 10);
+</script>
+</body>
+</html>
